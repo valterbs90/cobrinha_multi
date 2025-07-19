@@ -28,6 +28,8 @@ const totalCols = 30;
 const totalRows = 20;
 
 
+
+
 // Função que gera uma posição aleatória válida para a comida no grid
 function generateFood() {
   let newFood;
@@ -69,7 +71,6 @@ function createSnake() {
 }
 
 
-
   // Ouve o evento "direction" enviado pelo cliente para atualizar a direção da cobra
 // Mapeia as strings enviadas pelo cliente para vetores de direção
 const directionsMap = {
@@ -89,11 +90,19 @@ io.on("connection", (socket) => {
     dir: { x: 1, y: 0 },  // direção inicial (para direita)
     score: 0,
     color: getRandomColor(), // cor única para o jogador
+    name: "Jogs", // nome padrão
   };
 
-socket.on("direction", (dir) => {
-  const player = players[socket.id];
-  if (!player) return;
+  // Ouve o evento setName do cliente para atualizar o nome
+  socket.on("setName", (name) => {
+      if (players[socket.id]) {
+          players[socket.id].name = name.substring(0, 4); // Segurança extra
+      }
+  });
+  
+  socket.on("direction", (dir) => {
+    const player = players[socket.id];
+    if (!player) return;
 
   const newDir = directionsMap[dir];
   if (!newDir) return; // direção inválida ignorada

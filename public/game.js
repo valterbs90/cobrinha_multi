@@ -12,6 +12,8 @@ canvas.height = 400;
 // Inicializa a conexão com o servidor via socket.io
 const socket = io();
 
+
+
 // Variável para armazenar o estado do jogo enviado pelo servidor
 let gameState = null;
 
@@ -35,6 +37,25 @@ document.getElementById("controls").addEventListener("click", (e) => {
       socket.emit("direction", dir);
     }
   }
+});
+
+
+// Captura o botão e o campo de nome
+const btnSetName = document.getElementById("btnSetName");
+const inputName = document.getElementById("playerName");
+
+// Quando clicar no botão "OK", envia o nome para o servidor
+btnSetName.addEventListener("click", () => {
+    const name = inputName.value.trim().substring(0, 4); // até 4 caracteres
+    if (name.length > 0) {
+        socket.emit("setName", name); // envia para o servidor
+    }
+});
+
+inputName.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+        btnSetName.click(); // Simula clique no botão
+    }
 });
 
 
@@ -101,5 +122,23 @@ function draw() {
         for (let segment of snake) {
             ctx.fillRect(segment.x * box, segment.y * box, box, box);
         }
+
+        // Escreve o nome acima da cabeça da cobra
+        const head = snake[0];
+        ctx.font = "10px sans-serif";
+        ctx.fillStyle = "#fff";
+        ctx.textAlign = "center";
+        ctx.fillText(player.name || "Anon", head.x * box + box / 2, head.y * box - 2);
+
+        let yOffset = 15;
+        ctx.fillStyle = "#fff";
+        ctx.font = "12px sans-serif";
+        ctx.textAlign = "left";
+        for (const player of Object.values(gameState.players)) {
+        ctx.fillText(`${player.name}: ${player.score}`, 10, yOffset);
+        yOffset += 15;
+        }
+
+        
     }
 }

@@ -72,3 +72,35 @@ canvas {
   right: 0;
   transform: translateY(-50%);
 }
+
+/* nome do jogador */
+
+#playerNameContainer {
+  margin: 10px auto;
+  text-align: center;
+  color: #fff;
+  font-family: sans-serif;
+}
+
+#playerName {
+  width: 80px;
+  font-size: 18px;
+  padding: 4px;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+#btnSetName {
+  padding: 5px 10px;
+  font-size: 16px;
+  margin-left: 5px;
+  cursor: pointer;
+  background: #333;
+  border: none;
+  border-radius: 4px;
+  color: white;
+}
+
+#btnSetName:hover {
+  background: #555;
+}

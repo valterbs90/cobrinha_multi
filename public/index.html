@@ -11,6 +11,13 @@
 <body>
     <h1>Cobrinha Multiplayer 🐍</h1><!-- Título visível na página -->
 
+    <div id="playerNameContainer">
+        <label for="playerName">Seu nome (máx 4 chars): </label>
+        <input type="text" id="playerName" maxlength="4" placeholder="ABCD" />
+        <button id="btnSetName">OK</button>
+    </div>
+
+
     <!-- Canvas onde o jogo será desenhado -->
     <canvas id="gameCanvas" width="800" height="600"></canvas>
 
