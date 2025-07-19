@@ -20,12 +20,12 @@ app.use(express.static("public"));
 
 // Define dimensões da "área de jogo"
 const canvasWidth = 600;
-const canvasHeight = 400;
+const canvasHeight = 450;
 // Tamanho da célula do grid (quadrado)
 const box = 15;
 // Quantidade de linhas e colunas no grid (canvas dividido pelo tamanho da célula)
-const totalCols = 30;
-const totalRows = 20;
+const totalCols = 40;
+const totalRows = 30;
 
 
 

@@ -7,7 +7,7 @@ const ctx = canvas.getContext("2d");
 // Define o tamanho da "caixinha" do grid (tamanho do quadrado da cobra e comida)
 const box = 15;
 canvas.width = 600;
-canvas.height = 400;
+canvas.height = 450;
 
 // Inicializa a conexão com o servidor via socket.io
 const socket = io();
