@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8"><!-- Define codificação de caracteres -->
+    <title>Cobrinha Multiplayer</title><!-- Título da aba do navegador -->
+
+    <!-- Link externo para o CSS -->
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+    <h1>Cobrinha Multiplayer 🐍</h1><!-- Título visível na página -->
+
+    <!-- Canvas onde o jogo será desenhado -->
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+    <!-- Status de conexão exibido ao usuário -->
+    <div id="status">Conectando...</div>
+
+    <!-- Socket.io client (biblioteca para comunicação WebSocket) -->
+    <script src="/socket.io/socket.io.js"></script>
+
+    <!-- Link externo para o JavaScript do jogo -->
+    <script src="game.js"></script>
+</body>
+</html>

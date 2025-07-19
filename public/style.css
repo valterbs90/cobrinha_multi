@@ -1,0 +1,21 @@
+/* Estiliza o corpo da página */
+body {
+    margin: 0; /* Remove margens padrão */
+    background: #111; /* Fundo quase preto */
+    color: #fff; /* Texto branco */
+    font-family: sans-serif; /* Fonte sem serifa */
+    display: flex; /* Layout flexível */
+    flex-direction: column; /* Elementos em coluna */
+    align-items: center; /* Centraliza elementos horizontalmente */
+}
+
+/* Estiliza o canvas do jogo */
+canvas {
+    background: #6b6969; /* Fundo escuro para o canvas */
+    margin-top: 20px; /* Espaço acima do canvas */
+}
+
+/* Estiliza a div de status */
+#status {
+    margin-top: 10px; /* Espaço acima do texto de status */
+}
