@@ -26,9 +26,9 @@ canvas {
 
 #controls {
   position: relative;
-  width: 350px;
-  height: 350px;
-  margin: 20px auto;
+  width: 550px;
+  height: 550px;
+  margin: 100px auto;
   user-select: none;
 }
 
