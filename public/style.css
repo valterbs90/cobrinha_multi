@@ -20,18 +20,22 @@ canvas {
     margin-top: 10px; /* Espaço acima do texto de status */
 }
 
+
+/* botoes de controle */  
+
+
 #controls {
   position: relative;
-  width: 150px;
-  height: 150px;
+  width: 350px;
+  height: 350px;
   margin: 20px auto;
   user-select: none;
 }
 
 #controls button {
   position: absolute;
-  width: 50px;
-  height: 50px;
+  width: 70px;
+  height: 70px;
   font-size: 24px;
   background: #333;
   color: white;
@@ -50,26 +54,26 @@ canvas {
 
 /* Posicionamento em cruz */
 #controls button[data-dir="UP"] {
-  top: 0;
+  top: 10px;
   left: 50%;
   transform: translateX(-50%);
 }
 
 #controls button[data-dir="DOWN"] {
-  bottom: 0;
+  bottom: 10px;
   left: 50%;
   transform: translateX(-50%);
 }
 
 #controls button[data-dir="LEFT"] {
   top: 50%;
-  left: 0;
+  left: 10px;
   transform: translateY(-50%);
 }
 
 #controls button[data-dir="RIGHT"] {
   top: 50%;
-  right: 0;
+  right: 10px;
   transform: translateY(-50%);
 }
 
