@@ -19,3 +19,56 @@ canvas {
 #status {
     margin-top: 10px; /* Espaço acima do texto de status */
 }
+
+#controls {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  margin: 20px auto;
+  user-select: none;
+}
+
+#controls button {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  font-size: 24px;
+  background: #333;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  touch-action: manipulation;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#controls button:active {
+  background: #555;
+}
+
+/* Posicionamento em cruz */
+#controls button[data-dir="UP"] {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+#controls button[data-dir="DOWN"] {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+#controls button[data-dir="LEFT"] {
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+}
+
+#controls button[data-dir="RIGHT"] {
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+}

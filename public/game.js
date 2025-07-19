@@ -28,6 +28,16 @@ document.addEventListener("keydown", (e) => {
     }
 });
 
+document.getElementById("controls").addEventListener("click", (e) => {
+  if (e.target.tagName === "BUTTON") {
+    const dir = e.target.getAttribute("data-dir");
+    if (dir) {
+      socket.emit("direction", dir);
+    }
+  }
+});
+
+
 // Quando a conexão com o servidor é estabelecida
 socket.on("connect", () => {
     // Atualiza o status na tela para mostrar que está conectado
