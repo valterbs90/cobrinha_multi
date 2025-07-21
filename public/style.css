@@ -108,3 +108,13 @@ canvas {
 #btnSetName:hover {
   background: #555;
 }
+
+/* historico de ranking */
+#rankingBoard {
+    background-color: #222;
+    color: white;
+    padding: 10px;
+    width: 200px;
+    margin-top: 10px;
+    border-radius: 8px;
+}

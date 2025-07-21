@@ -1,39 +1,46 @@
-// Importa o framework Express para servir arquivos estáticos e criar servidor web
 const express = require("express");
-// Importa o módulo HTTP para criar o servidor
 const http = require("http");
-// Importa o Socket.IO para comunicação em tempo real WebSocket
 const { Server } = require("socket.io");
 
-// Cria a aplicação Express
 const app = express();
-// Cria o servidor HTTP usando o Express
 const server = http.createServer(app);
-// Inicializa o Socket.IO atrelado ao servidor HTTP
 const io = new Server(server);
 
-// Porta que o servidor vai escutar
 const PORT = 3000;
-
-// Serve os arquivos estáticos da pasta "public" (onde ficam index.html, css, js)
 app.use(express.static("public"));
 
-// Define dimensões da "área de jogo"
 const canvasWidth = 600;
 const canvasHeight = 450;
-// Tamanho da célula do grid (quadrado)
 const box = 15;
-// Quantidade de linhas e colunas no grid (canvas dividido pelo tamanho da célula)
 const totalCols = 40;
 const totalRows = 30;
 
+let topPlayers = [];
+const players = {};
+let food = generateFood();
 
+const directionsMap = {
+  UP:    { x: 0,  y: -1 },
+  DOWN:  { x: 0,  y: 1 },
+  LEFT:  { x: -1, y: 0 },
+  RIGHT: { x: 1,  y: 0 },
+};
 
+function updateRanking(player) {
+  const score = player.snake.length;
 
-// Função que gera uma posição aleatória válida para a comida no grid
+  topPlayers.push({
+    name: player.name || "Anon",
+    score: score,
+    timestamp: Date.now()
+  });
+
+  topPlayers.sort((a, b) => b.score - a.score);
+  topPlayers = topPlayers.slice(0, 6);
+}
+
 function generateFood() {
-  let newFood;
-  let collision;
+  let newFood, collision;
 
   do {
     collision = false;
@@ -42,7 +49,6 @@ function generateFood() {
       y: Math.floor(Math.random() * totalRows),
     };
 
-    // Verifica se a comida cai dentro de alguma cobra
     for (const player of Object.values(players)) {
       if (player.snake.some(segment => segment.x === newFood.x && segment.y === newFood.y)) {
         collision = true;
@@ -53,79 +59,84 @@ function generateFood() {
 
   return newFood;
 }
-// Objeto que guarda todos os jogadores conectados
-const players = {};
-// Variável global que guarda a posição atual da comida
-let food = generateFood();
 
+function createInitialSnake() {
+  const startX = Math.floor(Math.random() * totalCols);
+  const startY = Math.floor(Math.random() * totalRows);
+  const initialLength = 5;
+  const snake = [];
 
+  for (let i = 0; i < initialLength; i++) {
+    snake.push({ x: startX - i, y: startY });
+  }
 
-
-// Função que cria a cobra inicial para um novo jogador
-function createSnake() {
-  return [
-    { x: 5, y: 5 }, // cabeça da cobra
-    { x: 4, y: 5 }, // segmento 1
-    { x: 3, y: 5 }, // segmento 2 (cauda)
-  ];
+  return snake;
 }
 
+function getRandomColor() {
+  const letters = "0123456789ABCDEF";
+  let color = "#";
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
 
-  // Ouve o evento "direction" enviado pelo cliente para atualizar a direção da cobra
-// Mapeia as strings enviadas pelo cliente para vetores de direção
-const directionsMap = {
-  UP:    { x: 0,  y: -1 },
-  DOWN:  { x: 0,  y: 1 },
-  LEFT:  { x: -1, y: 0 },
-  RIGHT: { x: 1,  y: 0 },
-};
+function resetPlayerState(id) {
+  if (players[id]) {
+    updateRanking(players[id]);
+    players[id].snake = createInitialSnake();
+    players[id].dir = { x: 1, y: 0 };
+    players[id].alive = true;
+    players[id].score = 0;
+  }
+}
 
-// Evento que dispara quando um cliente conecta via Socket.IO
 io.on("connection", (socket) => {
   console.log("Novo jogador:", socket.id);
 
-  // Inicializa o novo jogador com uma cobra, direção, pontuação e cor aleatória
   players[socket.id] = {
-    snake: createSnake(), // array de segmentos
-    dir: { x: 1, y: 0 },  // direção inicial (para direita)
+    snake: createInitialSnake(),
+    dir: { x: 1, y: 0 },
     score: 0,
-    color: getRandomColor(), // cor única para o jogador
-    name: "Jogs", // nome padrão
+    color: getRandomColor(),
+    name: "Jogs",
+    alive: true,
   };
 
-  // Ouve o evento setName do cliente para atualizar o nome
   socket.on("setName", (name) => {
-      if (players[socket.id]) {
-          players[socket.id].name = name.substring(0, 4); // Segurança extra
-      }
+    if (players[socket.id]) {
+      players[socket.id].name = name.substring(0, 4);
+    }
   });
-  
+
   socket.on("direction", (dir) => {
     const player = players[socket.id];
     if (!player) return;
 
-  const newDir = directionsMap[dir];
-  if (!newDir) return; // direção inválida ignorada
+    const newDir = directionsMap[dir];
+    if (!newDir) return;
 
-  // Bloqueia direção oposta para evitar a cobra se "morder"
-  const currDir = player.dir;
-  if (currDir.x + newDir.x === 0 && currDir.y + newDir.y === 0) {
-    // se somar zero, significa que são opostas (ex: esquerda + direita)
-    return; // ignora essa mudança
-  }
+    const currDir = player.dir;
+    if (currDir.x + newDir.x === 0 && currDir.y + newDir.y === 0) return;
 
-  // Atualiza a direção para a nova direção válida
-  player.dir = newDir;
-});
+    player.dir = newDir;
+  });
 
-  // Remove jogador e sua cobra ao desconectar
+  socket.on("resetPlayer", () => {
+    resetPlayerState(socket.id);
+  });
+
+  socket.on("retry", () => {
+    resetPlayerState(socket.id);
+  });
+
   socket.on("disconnect", () => {
     console.log("Saiu:", socket.id);
     delete players[socket.id];
   });
 });
 
-// Função que atualiza o estado do jogo em intervalos regulares (game loop)
 function gameLoop() {
   for (let id in players) {
     const player = players[id];
@@ -134,16 +145,14 @@ function gameLoop() {
 
     const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
 
-    // Wrap-around
     head.x = (head.x + totalCols) % totalCols;
     head.y = (head.y + totalRows) % totalRows;
 
-    // Verifica colisão com o próprio corpo
     if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
-      // Jogador colidiu consigo mesmo, remove ou reinicia a cobra
       console.log(`Jogador ${id} colidiu e foi removido`);
+      io.to(id).emit("playerDied");
       delete players[id];
-      continue; // pula para o próximo jogador
+      continue;
     }
 
     snake.unshift(head);
@@ -156,28 +165,12 @@ function gameLoop() {
     }
   }
 
-  io.emit("gameState", {
-    food,
-    players,
-  });
+  io.emit("gameState", { food, players });
+  io.emit("rankingUpdate", topPlayers);
 }
 
-
-// Chama a função gameLoop a cada 100 ms para atualizar o jogo (10 FPS)
 setInterval(gameLoop, 100);
 
-// Função para gerar uma cor hexadecimal aleatória para identificar os jogadores
-function getRandomColor() {
-  const letters = "0123456789ABCDEF";
-  let color = "#";
-  for (let i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
-  }
-  return color;
-}
-
-// Inicia o servidor HTTP na porta definida e exibe mensagem no console
-server.listen(3000, '0.0.0.0', () => {
-  console.log("Servidor ouvindo em todas interfaces na porta 3000");
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`Servidor ouvindo em todas interfaces na porta ${PORT}`);
 });
-

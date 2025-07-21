@@ -1,33 +1,22 @@
-// Seleciona o elemento canvas do HTML
 const canvas = document.getElementById("gameCanvas");
-
-// Obtém o contexto 2D para desenhar no canvas
 const ctx = canvas.getContext("2d");
 
-// Define o tamanho da "caixinha" do grid (tamanho do quadrado da cobra e comida)
 const box = 15;
 canvas.width = 600;
 canvas.height = 450;
 
-// Inicializa a conexão com o servidor via socket.io
 const socket = io();
+const bgm = document.getElementById('bgm');
+bgm.playbackRate = 1.8;
 
+document.addEventListener('click', () => {
+  bgm.play().catch(() => {
+    console.log('Usuário precisa interagir para tocar áudio');
+  });
+}, { once: true });
 
-
-// Variável para armazenar o estado do jogo enviado pelo servidor
-let gameState = null;
-
-// Captura eventos de tecla pressionada no teclado
-document.addEventListener("keydown", (e) => {
-    const key = e.key; // tecla pressionada
-
-    // Verifica se a tecla é uma seta de direção
-    if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(key)) {
-
-        // Envia a direção para o servidor,
-        // removendo a palavra "Arrow" e transformando em maiúscula (ex: ArrowUp -> UP)
-        socket.emit("direction", key.replace("Arrow", "").toUpperCase());
-    }
+document.getElementById("btnReset").addEventListener("click", () => {
+  socket.emit("resetPlayer");
 });
 
 document.getElementById("controls").addEventListener("click", (e) => {
@@ -39,106 +28,112 @@ document.getElementById("controls").addEventListener("click", (e) => {
   }
 });
 
+document.addEventListener("keydown", (e) => {
+  const key = e.key;
+  if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(key)) {
+    socket.emit("direction", key.replace("Arrow", "").toUpperCase());
+  }
+});
 
-// Captura o botão e o campo de nome
 const btnSetName = document.getElementById("btnSetName");
 const inputName = document.getElementById("playerName");
 
-// Quando clicar no botão "OK", envia o nome para o servidor
 btnSetName.addEventListener("click", () => {
-    const name = inputName.value.trim().substring(0, 4); // até 4 caracteres
-    if (name.length > 0) {
-        socket.emit("setName", name); // envia para o servidor
-    }
+  const name = inputName.value.trim().substring(0, 4);
+  if (name.length > 0) {
+    socket.emit("setName", name);
+  }
 });
 
 inputName.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-        btnSetName.click(); // Simula clique no botão
-    }
+  if (e.key === "Enter") {
+    btnSetName.click();
+  }
 });
 
-
-// Quando a conexão com o servidor é estabelecida
 socket.on("connect", () => {
-    // Atualiza o status na tela para mostrar que está conectado
-    document.getElementById("status").innerText = "Conectado!";
+  document.getElementById("status").innerText = "Conectado!";
 });
 
-// Quando o servidor envia o estado do jogo
+let gameState = null;
+
 socket.on("gameState", (state) => {
-    gameState = state; // salva o estado na variável
-    draw(); // chama a função que desenha o jogo na tela
+  gameState = state;
+  draw();
 });
 
-function drawGrid() {
-    const gridSize = box * 2; // espaçamento entre linhas do grid
+socket.on("rankingUpdate", (ranking) => {
+  const list = document.getElementById("rankingList");
+  list.innerHTML = "";
 
-    ctx.strokeStyle = '#333'; // cor das linhas do grid
-    ctx.lineWidth = 1; // espessura da linha
+  for (const player of ranking) {
+    const item = document.createElement("li");
+    item.textContent = `${player.name} - ${player.score}`;
+    list.appendChild(item);
+  }
+});
 
-    // linhas verticais
-    for (let x = 0; x <= canvas.width; x += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
-        ctx.stroke();
-    }
+socket.on("playerDied", showRetryButton);
 
-    // linhas horizontais
-    for (let y = 0; y <= canvas.height; y += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.stroke();
-    }
+function showRetryButton() {
+  document.getElementById("retryBtn").style.display = "block";
 }
 
-// Função que desenha o estado atual do jogo no canvas
+function retryGame() {
+  socket.emit("resetPlayer");
+  document.getElementById("retryBtn").style.display = "none";
+}
+
+function drawGrid() {
+  const gridSize = box * 2;
+  ctx.strokeStyle = '#333';
+  ctx.lineWidth = 1;
+
+  for (let x = 0; x <= canvas.width; x += gridSize) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, canvas.height);
+    ctx.stroke();
+  }
+
+  for (let y = 0; y <= canvas.height; y += gridSize) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(canvas.width, y);
+    ctx.stroke();
+  }
+}
+
 function draw() {
-    if (!gameState) return; // Se não tem estado, não desenha nada
+  if (!gameState) return;
 
-    // Limpa todo o canvas para desenhar o próximo frame
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawGrid();
 
-    // Desenha o grid
-    drawGrid();
+  ctx.fillStyle = "#f00";
+  ctx.fillRect(gameState.food.x * box, gameState.food.y * box, box, box);
 
-    // Define cor vermelha para a comida
-    ctx.fillStyle = "#f00";
+  for (const [id, player] of Object.entries(gameState.players)) {
+    const snake = player.snake;
+    ctx.fillStyle = player.color || "#00f";
 
-    // Desenha a comida no canvas,
-    // multiplicando x e y pelo tamanho da caixa para alinhar no grid
-    ctx.fillRect(gameState.food.x * box, gameState.food.y * box, box, box);
-
-    // Para cada jogador no objeto players (id => jogador)
-    for (const [id, player] of Object.entries(gameState.players)) {
-        const snake = player.snake; // array dos segmentos da cobra
-
-        // Usa a cor do jogador recebida do servidor
-        ctx.fillStyle = player.color || "#00f"; // azul padrão se não tiver cor
-
-        // Desenha cada segmento da cobra
-        for (let segment of snake) {
-            ctx.fillRect(segment.x * box, segment.y * box, box, box);
-        }
-
-        // Escreve o nome acima da cabeça da cobra
-        const head = snake[0];
-        ctx.font = "10px sans-serif";
-        ctx.fillStyle = "#fff";
-        ctx.textAlign = "center";
-        ctx.fillText(player.name || "Anon", head.x * box + box / 2, head.y * box - 2);
-
-        let yOffset = 15;
-        ctx.fillStyle = "#fff";
-        ctx.font = "12px sans-serif";
-        ctx.textAlign = "left";
-        for (const player of Object.values(gameState.players)) {
-        ctx.fillText(`${player.name}: ${player.score}`, 10, yOffset);
-        yOffset += 15;
-        }
-
-        
+    for (let segment of snake) {
+      ctx.fillRect(segment.x * box, segment.y * box, box, box);
     }
+
+    const head = snake[0];
+    ctx.font = "10px sans-serif";
+    ctx.fillStyle = "#fff";
+    ctx.textAlign = "center";
+    ctx.fillText(player.name || "Anon", head.x * box + box / 2, head.y * box - 2);
+  }
+
+  let yOffset = 15;
+  ctx.fillStyle = "#fff";
+  ctx.font = "12px sans-serif";
+  ctx.textAlign = "left";
+  for (const player of Object.values(gameState.players)) {
+    ctx.fillText(`${player.name}: ${player.score}`, 10, yOffset);
+    yOffset += 15;
+  }
 }

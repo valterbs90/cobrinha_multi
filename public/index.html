@@ -9,6 +9,9 @@
 
 </head>
 <body>
+
+    <audio id="bgm" src="bgm.mp3" loop></audio>
+
     <h1>Cobrinha Multiplayer 🐍</h1><!-- Título visível na página -->
 
     <div id="playerNameContainer">
@@ -28,6 +31,13 @@
         <button data-dir="RIGHT">→</button>
     </div>
 
+    <div id="rankingBoard">
+        <h3>🏆 Ranking</h3>
+        <ol id="rankingList"></ol>
+    </div>
+
+    <button id="retryBtn" onclick="retryGame()" style="display:none;">Tentar Novamente</button>
+    <button id="btnReset">Reset</button>
 
     <!-- Status de conexão exibido ao usuário -->
     <div id="status">Conectando...</div>
