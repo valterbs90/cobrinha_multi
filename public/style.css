@@ -32,20 +32,22 @@ canvas {
   user-select: none;
 }
 
+
 #controls button {
   position: absolute;
-  width: 70px;
-  height: 70px;
-  font-size: 24px;
+  width: 160px;       /* Aumentado */
+  height: 160px;      /* Aumentado */
+  font-size: 70px;    /* Aumentado */
   background: #333;
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 26px; /* Aumentado */
   cursor: pointer;
   touch-action: manipulation;
   display: flex;
   justify-content: center;
   align-items: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
 
 #controls button:active {
