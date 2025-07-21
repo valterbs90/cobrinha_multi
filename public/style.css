@@ -26,18 +26,17 @@ canvas {
 
 #controls {
   position: relative;
-  width: 550px;
-  height: 550px;
+  width: 780px;
+  height: 650px;
   margin: 100px auto;
   user-select: none;
 }
 
-
 #controls button {
   position: absolute;
-  width: 160px;       /* Aumentado */
-  height: 160px;      /* Aumentado */
-  font-size: 70px;    /* Aumentado */
+  width: 200px;       /* Aumentado */
+  height: 200px;      /* Aumentado */
+  font-size: 100px;    /* Aumentado */
   background: #333;
   color: white;
   border: none;
@@ -56,26 +55,26 @@ canvas {
 
 /* Posicionamento em cruz */
 #controls button[data-dir="UP"] {
-  top: 10px;
+  top: 5px;
   left: 50%;
   transform: translateX(-50%);
 }
 
 #controls button[data-dir="DOWN"] {
-  bottom: 10px;
+  bottom: 5px;
   left: 50%;
   transform: translateX(-50%);
 }
 
 #controls button[data-dir="LEFT"] {
   top: 50%;
-  left: 10px;
+  left: 5px;
   transform: translateY(-50%);
 }
 
 #controls button[data-dir="RIGHT"] {
   top: 50%;
-  right: 10px;
+  right: 5px;
   transform: translateY(-50%);
 }
 
